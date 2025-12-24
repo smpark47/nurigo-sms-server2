@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# virtualenv
+.venv/
+venv/
+env/
+
+# local secrets
+.env
+
+# runtime data
+data/
+logs/
