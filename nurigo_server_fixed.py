@@ -799,8 +799,25 @@ function givenName(full) {
   return parts.length > 1 ? parts[parts.length-1] : s;
 }
 
+function nowKR(){
+  const d=new Date();
+  const hh=String(d.getHours()).padStart(2,"0");
+  const mm=String(d.getMinutes()).padStart(2,"0");
+  return `${hh}:${mm}`;
+}
+
+function applyTokens(txt, student){
+  const s=student||{};
+  let out=String(txt||"");
+  out=out.replaceAll("{given}", givenName(s?.name||""));
+  out=out.replaceAll("{time}", nowKR());
+  return out;
+}
+
 const TEMPLATES = [
   { label:"미등원 안내",  text:"안녕하세요. 서울더함수학학원입니다. {given} 아직 등원 하지 않았습니다." },
+  { label:"등원 확인",  text:"안녕하세요. 서울더함수학학원입니다. {given} {time}에 등원하였습니다." },
+  { label:"하원 확인",  text:"안녕하세요. 서울더함수학학원입니다. {given} {time}에 하원하였습니다." },
   { label:"조퇴 안내",   text:"안녕하세요. 서울더함수학학원입니다. {given} 아파서 오늘 조퇴하였습니다. 아이 상태 확인해주세요." },
   { label:"숙제 미제출",  text:"안녕하세요. 서울더함수학학원입니다. {given} 오늘 과제 미제출입니다. 가정에서 점검 부탁드립니다." },
   { label:"교재 공지",   text:"안녕하세요. 서울더함수학학원입니다. {given} 새로운 교재 준비 부탁드립니다." }
@@ -913,7 +930,7 @@ function setupTemplates(){
     b.textContent=t.label;
     b.addEventListener("click",()=>{
       const s = state.currentStudent;
-      const txt = t.text.replaceAll("{given}", givenName(s?.name||""));
+      const txt = applyTokens(t.text, s);
       $("#text").value = txt;
       updatePreview();
     });
@@ -990,7 +1007,7 @@ function updatePreview(){
   const s = state.currentStudent;
   $("#toPreview").textContent = computeTo() || "-";
   const txt=$("#text").value||"";
-  $("#preview").textContent = txt.replaceAll("{given}", givenName(s?.name||""));
+  $("#preview").textContent = applyTokens(txt, s);
 }
 
 async function send(){
@@ -998,7 +1015,7 @@ async function send(){
   const to=onlyDigits(computeTo());
   const from=onlyDigits(state.defaultFrom||"");
   const dry=$("#dry").checked;
-  const text=($("#text").value||"").replaceAll("{given}", givenName(s?.name||""));
+  const text=applyTokens($("#text").value||"", s);
 
   $("#status").textContent="전송 중...";
   if(!s){ alert("학생을 먼저 선택하세요."); $("#status").textContent=""; return; }
